@@ -1,0 +1,126 @@
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">Angular Blog</span>
+
+    <div *ngIf="!isSignIn" class="btn-group" role="group" aria-label="Basic example">
+      <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#signInModal">Sign In</button>
+      <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#signUpModal">Sign Up</button>
+    </div>
+
+    <div *ngIf="isSignIn" class="btn-group" role="group" aria-label="Basic example">
+      <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addPostModal">Add post</button>
+      <button type="button" class="btn btn-warning" disabled>{{registrationUserName}}</button>
+      <button (click)="exit()" type="button" class="btn btn-outline-warning">Sign Out</button>
+    </div>
+
+  </div>
+</nav>
+
+<div class="container">
+  <div *ngFor="let b of readBlogs" class="card mt-3 mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{b.topic}}</h5>
+      <div class="d-flex justify-content-between">
+        <h6 class="fs-6">Posted by: {{b.postedBy}}</h6>
+        <i class="bi bi-clock"> {{b.dateNow | date: 'HH:mm, dd.MM.yyy'}}</i>
+      </div>
+      <p class="card-text">{{b.message}}</p>
+      <div *ngIf="registrationUserName ===  b.postedBy || registrationUserName === 'admin'"
+        class="d-flex justify-content-end">
+        <div class="btn-group " role="group" aria-label="Basic example">
+          <button (click)="editPost(b)" type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addPostModal">Edit</button>
+          <button (click)="deletePost(b)" type="button" class="btn btn-danger">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- !-- Modal Sing In -->
+<div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Sign In</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Email:</label>
+          <input [(ngModel)]="verifyEmail" type="email" class="form-control" id="exampleInputEmail1"
+            aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Password:</label>
+          <input [(ngModel)]="verifyPassword" type="password" class="form-control" id="exampleInputPassword1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button (click)="signIn()" type="button" class="btn btn-success" data-bs-dismiss="modal">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- !-- Modal Sign Up-->
+<div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Sign Up</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="exampleInputUsername1" class="form-label">Username:</label>
+          <input [(ngModel)]="signUpUsername" type="text" class="form-control" id="exampleInputUsername1">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail2" class="form-label">Email:</label>
+          <input [(ngModel)]="signUpUseremail" type="email" class="form-control" id="exampleInputEmail2"
+            aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword2" class="form-label">Password:</label>
+          <input [(ngModel)]="signUpUserpassword" type="password" class="form-control" id="exampleInputPassword2">
+        </div>
+        <div *ngIf="ifIsUser" class="form-text">User with that name or email already exist.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button (click)="signUp()" type="button" class="btn btn-primary" data-bs-dismiss="modal">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- !-- Modal Add post-->
+<div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add post</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="exampleFormControlInput1" class="form-label">Title:</label>
+          <input [(ngModel)]="topic" type="text" class="form-control" id="exampleFormControlInput1">
+        </div>
+        <div class="mb-3">
+          <label for="exampleFormControlTextarea1" class="form-label">Text:</label>
+          <textarea [(ngModel)]="text" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button *ngIf="!isEditStatus" (click)="addPost()" type="button" class="btn btn-success" data-bs-dismiss="modal">Post</button>
+        <button *ngIf="isEditStatus" (click)="saveEditPost()" type="button" class="btn btn-success" data-bs-dismiss="modal">Edit Post</button>
+      </div>
+    </div>
+  </div>
+</div>
